@@ -4,6 +4,7 @@ import { Observable, of, switchMap } from 'rxjs';
 import { Product } from '../product';
 import { ProductsService } from '../products.service';
 import { AuthService } from '../../auth/auth.service';
+import { CartService } from '../../cart/cart.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -24,7 +25,8 @@ export class ProductDetailComponent implements OnInit, OnChanges {
   constructor(
       private productService: ProductsService,
       public authService: AuthService,
-      private route: ActivatedRoute
+      private route: ActivatedRoute,
+      private cartService: CartService
     ) {
     console.log(`Name is ${this.product} in the constructor`);
   }
@@ -43,8 +45,8 @@ export class ProductDetailComponent implements OnInit, OnChanges {
     // this.product$ = this.productService.getProduct(id);
   }
 
-  buy() {
-    this.bought.emit();
+  buy(product: Product) {
+    this.cartService.addProduct(product);
   }
 
   changePrice(product: Product, price: number) {

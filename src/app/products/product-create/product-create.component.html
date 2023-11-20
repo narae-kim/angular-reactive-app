@@ -1,11 +1,40 @@
-<div>
-    <label for="name">Name</label>
-    <input id="name" #name/>
-</div>
-<div>
-    <label for="price">Price</label>
-    <input id="price" #price/>
-</div>
-<div>
-    <button (click)="createProduct(name.value, price.valueAsNumber)">Create</button>
-</div>
+<form [formGroup]="productForm" (ngSubmit)="createProduct()">
+    <div>
+        <label for="name">Name</label>
+        <input id="name" formControlName="name" required />
+        <span *ngIf="name.touched && name.invalid">
+            This name is not valid
+        </span>
+    </div>
+    <div>
+        <label for="price">Price</label>
+        <input id="price" formControlName="price" required />
+        <span *ngIf="price.touched && price.hasError('required')">
+            This price is required
+        </span>
+        <span *ngIf="price.touched && price.hasError('outOfRange')">
+            The price is out of range
+        </span>
+        <span *ngIf="showPriceRangeHint">
+            Price should be between 1 and 10000
+        </span>
+    </div>
+    <div>
+        <button type="submit" [disabled]="!productForm.valid">Create</button>
+    </div>
+</form>
+<!-- <form formGroupName="info">
+    <h2>Proeduct information</h2>
+    <div>
+        <label for="category">Category</label>
+        <input id="category" formControlName="category" />
+    </div>
+    <div>
+        <label for="descr">Description</label>
+        <input id="descr" formControlName="description"/>
+    </div>
+    <div>
+        <label for="photo">Photo URL</label>
+        <input id="photo" formControlName="image" />
+    </div>
+</form> -->
