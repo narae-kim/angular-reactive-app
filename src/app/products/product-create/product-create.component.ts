@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { map, Observable } from 'rxjs';
 
 import { ProductsService } from '../products.service';
 import { Product } from '../product';
@@ -22,36 +23,28 @@ export class ProductCreateComponent implements OnInit {
     price: new FormControl<number | undefined>(undefined, {
       nonNullable: true,
       validators: [Validators.required, priceRanceValidator()]
-    }) //,
-    // info: new FormGroup({
-    //   category: new FormControl(''),
-    //   description: new FormControl(''),
-    //   image: new FormControl('')
-    // })
+    })
   });
 
-  // productForm: FormGroup<{
-  //   name: new FormControl<string>,
-  //   price: new FormControl<number | undefined>
-  // }> | undefined;
-
   showPriceRangeHint = false;
+
+  products: Product[] = [];
+
+  products$: Observable<Product[]> | undefined;
+
+  categories = ['Hardware', 'Computers', 'Clothing', 'Software'];
 
   constructor(private productsService: ProductsService, private builder: FormBuilder) {}
 
   ngOnInit(): void {
-      this.price.valueChanges.subscribe(price => {
-        if(price) {
-          this.showPriceRangeHint = price > 1 && price < 10000;
-        }
-      })
-  }
+      this.productsService.getProducts().subscribe(products => {
+        this.products = products;
+      });
 
-  // createProduct(name: string, price: number) {
-  //   this.productsService.addProduct(name, price).subscribe(product => {
-  //     this.added.emit(product);
-  //   });
-  // }
+      this.products$ = this.name.valueChanges.pipe(
+        map(name => this.products.filter(product => product.name.startsWith(name)))
+      );
+  }
 
   createProduct() {
     this.productsService.addProduct(this.name.value, Number(this.price.value)).subscribe(product => {
@@ -63,12 +56,5 @@ export class ProductCreateComponent implements OnInit {
   get name() { return this.productForm.controls.name }
 
   get price() { return this.productForm.controls.price }
-
-  // private buildForm() {
-  //   this.productForm = this.builder.nonNullable.group({
-  //     name: this.builder.nonNullable.control(''),
-  //     price: this.builder.nonNullable.control<number | undefined>(undefined, {})
-  //   });
-  // }
 
 }

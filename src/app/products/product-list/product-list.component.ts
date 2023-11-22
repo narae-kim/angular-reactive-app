@@ -3,6 +3,9 @@ import { ProductDetailComponent } from '../product-detail/product-detail.compone
 import { Product } from '../product';
 import { ProductsService } from '../products.service';
 import { Subscription, Observable } from 'rxjs';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-product-list',
@@ -13,11 +16,17 @@ export class ProductListComponent implements OnDestroy, OnInit, AfterViewInit {
 
   selectedProduct: Product | undefined;
 
-  products: Product[] = [];
+  // products: Product[] = [];
+  products = new MatTableDataSource<Product>([]);
+  columnNames = ['name', 'price'];
 
   products$: Observable<Product[]> | undefined;
 
   @ViewChild(ProductDetailComponent) productDetail: ProductDetailComponent | undefined;
+
+  @ViewChild(MatSort) sort: MatSort | null = null;
+
+  @ViewChild(MatPaginator) paginator: MatPaginator | null = null;
 
   private productsSub: Subscription | undefined;
 
@@ -25,17 +34,14 @@ export class ProductListComponent implements OnDestroy, OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.getProducts();
-    this.getProductsAsync();
   }
 
   private getProducts() {
     this.productService.getProducts().subscribe(products => {
-      this.products = products;
-    })
-  }
-
-  private getProductsAsync() {
-    this.products$ = this.productService.getProducts();
+      this.products = new MatTableDataSource(products);
+      this.products.sort = this.sort;
+      this.products.paginator = this.paginator;
+    });
   }
 
   ngAfterViewInit(): void {
@@ -53,11 +59,11 @@ export class ProductListComponent implements OnDestroy, OnInit, AfterViewInit {
   }
 
   onAdd(product: Product) {
-    this.products.push(product);
+    this.products.data.push(product);
   }
 
   onDelete() {
-    this.products = this.products.filter(product => product !== this.selectedProduct);
+    this.products.data = this.products.data.filter(product => product !== this.selectedProduct);
     this.selectedProduct = undefined;
   }
   
