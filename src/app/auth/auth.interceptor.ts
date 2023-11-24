@@ -3,20 +3,32 @@ import {
   HttpRequest,
   HttpHandler,
   HttpEvent,
-  HttpInterceptor
+  HttpInterceptor,
+  HttpErrorResponse,
+  HttpStatusCode
 } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable, catchError, throwError } from 'rxjs';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  constructor() {}
+  constructor(private authService: AuthService) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const authReq = request.clone({
       setHeaders: { Authorization: 'myAuthToken' }
     });
 
-    return next.handle(authReq);
+    return next.handle(authReq).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === HttpStatusCode.Unauthorized) {
+          this.authService.logout();
+          return EMPTY;
+        } else {
+          return throwError(() => error);
+        }
+      })
+    );
   }
 }
